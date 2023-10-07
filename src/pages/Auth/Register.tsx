@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Button,
   Typography,
@@ -5,21 +6,54 @@ import {
   CircularProgress,
   Stack,
 } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { RoutePaths } from "../../enums/routes";
+import { registerUser } from "../../api/authApi";
+import { useMutation } from "@tanstack/react-query";
+import { useAuthActions } from "../../store/auth/Provider";
 
 function Register() {
-  const isMutating = false;
-  async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
+  const { signUp } = useAuthActions();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { mutateAsync, isLoading } = useMutation(registerUser, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error:any) => {
+      // Extract the error message from the server response
+      const responseError =
+        error.response?.data?.message || "An error occurred";
+      setErrorMessage(responseError);
+    },
+  });
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-  }
+
+    const formData = new FormData(e.currentTarget);
+    const userData = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      password: formData.get("password"),
+      password_confirmation: formData.get("re_password"),
+    };
+
+    const data = await mutateAsync(userData);
+    signUp(data.user, () => {
+      navigate(RoutePaths.CreateFeed);
+    });
+    setErrorMessage(null);
+  };
 
   return (
     <form onSubmit={handleSubmit}>
       <Typography variant="h4" gutterBottom align="center">
         Register
       </Typography>
-
+      {errorMessage && (
+        <Typography color="error" variant="body2" gutterBottom>
+          {errorMessage}
+        </Typography>
+      )}
       <Stack gap={1.5}>
         <TextField
           fullWidth
@@ -32,8 +66,8 @@ function Register() {
 
         <TextField
           fullWidth
-          label="Phone/Email"
-          name="username"
+          label="Email"
+          name="email"
           variant="outlined"
           type="text"
           required
@@ -63,16 +97,12 @@ function Register() {
           type="submit"
           variant="contained"
           color="info"
-          disabled={isMutating}
-          endIcon={isMutating ? <CircularProgress size="1rem" /> : undefined}
+          disabled={isLoading}
+          endIcon={isLoading ? <CircularProgress size="1rem" /> : undefined}
         >
           Register
         </Button>
       </Stack>
-
-      <Typography align="center" marginX={1}>
-        or
-      </Typography>
 
       <Typography marginY={1.5}>
         Already have an Account? <Link to={RoutePaths.Login}>Login here</Link>

@@ -1,8 +1,15 @@
+import Stack from '@mui/material/Stack';
+import PostFeed from "../components/Feed"
 
 
 function Home() {
   return (
-    <div>Home</div>
+    <Stack gap={2}>
+        <PostFeed/>
+        <PostFeed/>
+        <PostFeed/>
+        <PostFeed/>
+    </Stack>
   )
 }
 

@@ -3,4 +3,5 @@ export enum RoutePaths {
     Register = '/register',
     ForgetPassword = '/forget-password',
     Home = '/',
+    CreateFeed = '/create-feed'
  }
