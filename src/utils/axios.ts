@@ -1,43 +1,38 @@
-import axios, { AxiosInstance, AxiosError } from "axios";
-import { RoutePaths } from "../enums/routes";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { getFromLocalStorage } from "./localStorage";
-import { IUser } from "../interfaces/type";
+import { useAuthActions } from "../store/auth/Provider";
 
-const handleUnauthorized = (error: AxiosError) => {
-  if (error.response && error.response.status === 401) {
-    window.location.href = RoutePaths.Login
-  }
-  return Promise.reject(error);
-};
+export const HttpClient = axios.create({
+  baseURL: import.meta.env.VITE_BACKEND_URL,
+  timeout: 5000,
+  headers: { Accept: "application/json" },
+});
 
-const createHttpClient = (): AxiosInstance => {
- 
-  const httpClient = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL,
-    timeout: 5000,
-    headers: { Accept: "application/json" },
-  });
-
-  httpClient.interceptors.request.use(
-    (config) => {
-
-      const data = getFromLocalStorage('auth') as IUser;
-      if (data) {
-        config.headers.Authorization = `Bearer ${data.token}`;
-      }
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
+HttpClient.interceptors.request.use(
+  (config) => {
+    const token = getFromLocalStorage("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-  );
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-  httpClient.interceptors.response.use(
-    (response) => response,
-    (error: AxiosError) => handleUnauthorized(error)
-  );
+HttpClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const navigate = useNavigate();
+    const { signOut } = useAuthActions();
 
-  return httpClient;
-};
-
-export const HttpClient = createHttpClient();
+    if (error.response && error.response.status === 401) {
+      signOut(() => {
+        navigate("/login");
+      });
+    }
+    return Promise.reject(error);
+  }
+);

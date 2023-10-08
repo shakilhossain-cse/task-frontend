@@ -7,12 +7,14 @@ import Register from "../pages/Auth/Register";
 import ForgetPassword from "../pages/Auth/ForgetPassword";
 import Home from "../pages/Home";
 import CreateFeed from "../pages/CreateFeed";
+import PostDetails from "../pages/PostDetails";
 
 function Routes() {
   return (
     <Router>
       <Route path="/" element={<UserLayout />}>
         <Route path={RoutePaths.Home} element={<Home />} />
+        <Route path={`${RoutePaths.PostDetails}/:postId`} element={<PostDetails />} />
         <Route path={RoutePaths.CreateFeed} element={<CreateFeed />} />
       </Route>
       <Route path="/" element={<AuthLayout />}>

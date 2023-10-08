@@ -9,11 +9,13 @@ export interface User {
 }
 
 export interface IAuthState {
-   user: User | null;
-}
+   user: User | null,
+   token: string | null,
+ }
 
-const initialState = {
+const initialState: IAuthState = {
    user: null,
-} as unknown as IAuthState;
+   token: null
+ };
 
 export default initialState;

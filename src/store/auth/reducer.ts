@@ -1,13 +1,13 @@
-import { IAuthState, User } from "./initialState";
+import { IAuthState } from "./initialState";
 
 interface loginUser {
   type: "login";
-  payload: User | null;
+  payload: IAuthState;
 }
 
 interface RegisterUser {
   type: "register";
-  payload: User; // You may adjust payload based on your requirements
+  payload: IAuthState;
 }
 
 interface LogoutUser {
@@ -21,14 +21,20 @@ function authReducer(state: IAuthState, action: Action): IAuthState {
     case "login":
       return {
         ...state,
-        user: action.payload as User,
+        user: action.payload.user,
+        token: action.payload.token,
       };
     case "register":
-      return { ...state, user: action.payload as User };
+      return {
+        ...state,
+        user: action.payload.user,
+        token: action.payload.token,
+      };
     case "logout":
       return {
         ...state,
         user: null,
+        token: null
       };
 
     default:

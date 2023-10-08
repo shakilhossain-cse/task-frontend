@@ -26,6 +26,7 @@ export default function Login() {
       setErrorMessage(responseError);
     },
   });
+  
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -35,7 +36,7 @@ export default function Login() {
       password: formData.get("password"),
     };
     const data = await mutateAsync(userData);
-    signIn(data.user, () => {
+    signIn(data, () => {
       navigate(RoutePaths.CreateFeed);
     });
     setErrorMessage(null);

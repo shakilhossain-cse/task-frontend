@@ -13,7 +13,10 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { RoutePaths } from "../enums/routes";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth, useAuthActions } from "../store/auth/Provider";
+import { useMutation } from "@tanstack/react-query";
+import { logoutUser } from "../api/authApi";
 
 const pages = [
   {
@@ -21,9 +24,12 @@ const pages = [
     path: RoutePaths.CreateFeed,
   },
 ];
-const settings = ["Logout"];
 
 function Navbar() {
+  const {navigate} = useNavigate();
+  const { user } = useAuth();
+  const { signOut } = useAuthActions();
+  const { mutateAsync } = useMutation(logoutUser);
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
@@ -46,12 +52,20 @@ function Navbar() {
     setAnchorElUser(null);
   };
 
+  const handleLogout = async() => {
+    
+  await mutateAsync(user);
+    signOut(()=>{
+      navigate(RoutePaths.Login);
+    })
+  };
+
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Link to={RoutePaths.Home}>
-            <Box display={'flex'} sx={{color:'white'}}>
+            <Box display={"flex"} sx={{ color: "white" }}>
               <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
               <Typography
                 variant="h6"
@@ -102,8 +116,8 @@ function Navbar() {
               }}
             >
               {pages.map((page) => (
-                <Link to={page.path}>
-                  <MenuItem key={page.name} onClick={handleCloseNavMenu}>
+                <Link to={page.path} key={page.name}>
+                  <MenuItem onClick={handleCloseNavMenu}>
                     <Typography textAlign="center">{page.name}</Typography>
                   </MenuItem>
                 </Link>
@@ -131,7 +145,7 @@ function Navbar() {
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {pages.map((page) => (
-              <Link to={page.path}>
+              <Link to={page.path} key={page.name}>
                 <Button
                   key={page.name}
                   onClick={handleCloseNavMenu}
@@ -165,11 +179,9 @@ function Navbar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
+              <MenuItem onClick={handleLogout}>
+                <Typography textAlign="center">Logout</Typography>
+              </MenuItem>
             </Menu>
           </Box>
         </Toolbar>

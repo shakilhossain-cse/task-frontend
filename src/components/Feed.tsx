@@ -1,57 +1,56 @@
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import CardMedia from '@mui/material/CardMedia';
-import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import Avatar from '@mui/material/Avatar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import { red } from '@mui/material/colors';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import CommentIcon from '@mui/icons-material/Comment';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import defaultImage from '../assets/img/default-image.png'
+import React from 'react'
+import Card from "@mui/material/Card";
+
+import CardMedia from "@mui/material/CardMedia";
+import CardContent from "@mui/material/CardContent";
+import CardActions from "@mui/material/CardActions";
+
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+
+import CommentIcon from "@mui/icons-material/Comment";
+
+import {IPostFeed } from '../interfaces/type';
+import { Link } from 'react-router-dom';
+import { RoutePaths } from '../enums/routes';
+import UserProfile from './UserProfile';
 
 
-export default function PostFeed() {
+const PostFeed: React.FC<IPostFeed> = ({post,reactions}) => {
+
   return (
     <Card>
-      <CardHeader
-        avatar={
-          <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-            R
-          </Avatar>
-        }
-        action={
-          <IconButton aria-label="settings">
-            <MoreVertIcon />
-          </IconButton>
-        }
-        title="Shrimp and Chorizo Paella"
-        subheader="September 14, 2016"
-      />
-      <CardMedia
-        component="img"
-        height="194"
-        image={defaultImage}
-        alt="Paella dish"
-      />
+      <UserProfile data={post.user} created_at={post.created_at}/>
+      {post.images.length ? (
+        <CardMedia
+          component="img"
+          height="194"
+          image={post.images[0]}
+          alt="Paella dish"
+        />
+      ) : (
+        ''
+      )}
+      <Link to={`${RoutePaths.PostDetails}/${post.id}`}>
+      
       <CardContent>
         <Typography variant="body2" color="text.secondary">
-          This impressive paella is a perfect party dish and a fun meal to cook
-          together with your guests. Add 1 cup of frozen peas along with the mussels,
-          if you like.
+          {post.title}
         </Typography>
       </CardContent>
-      <CardActions sx={{display:'flex', justifyContent:"space-between"}}>
-        <IconButton aria-label="add to favorites">
-          <ThumbUpIcon />
-        </IconButton>
+      </Link>
+      <CardActions sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        {reactions.map((reaction) => (
+          <IconButton aria-label="add to favorites" key={reaction.id}>
+            {reaction.title}
+          </IconButton>
+        ))}
+
         <IconButton aria-label="share">
           <CommentIcon />
         </IconButton>
-
       </CardActions>
     </Card>
   );
-}
+};
+ export default  PostFeed

@@ -4,8 +4,8 @@ import authReducer from "./reducer";
 import { getFromLocalStorage, setLocalStorage } from "../../utils/localStorage";
 
 interface AuthContextType {
-  signUp: (payload: User, callback?: VoidFunction) => void;
-  signIn: (payload: User, callback?: VoidFunction) => void;
+  signUp: (payload: IAuthState, callback?: VoidFunction) => void;
+  signIn: (payload: IAuthState, callback?: VoidFunction) => void;
   signOut: (callback: VoidFunction) => void;
 }
 
@@ -19,20 +19,27 @@ const AuthProvider: React.FC<React.PropsWithChildren> = (props) => {
     (initial) => {
       if (typeof localStorage === "undefined") return initial;
 
-      return getFromLocalStorage('auth')  || initial;
+      return (
+        {
+          user: getFromLocalStorage("auth") as User,
+          token: getFromLocalStorage("token") as string ,
+        } as IAuthState|| initial
+      );
     }
   );
 
   useEffect(() => {
-    setLocalStorage('auth', state)
+    getFromLocalStorage("auth");
+
+    setLocalStorage("auth", state.user);
+    setLocalStorage("token", state.token);
   }, [state]);
 
-  function signUp(payload: User, cb: VoidFunction | undefined) {
+  function signUp(payload: IAuthState, cb: VoidFunction | undefined) {
     dispatch({ type: "register", payload });
     cb && cb();
   }
-
-  function signIn(payload: User, cb: VoidFunction | undefined) {
+  function signIn(payload: IAuthState, cb: VoidFunction | undefined) {
     dispatch({ type: "login", payload });
     cb && cb();
   }

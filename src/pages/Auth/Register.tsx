@@ -38,7 +38,7 @@ function Register() {
     };
 
     const data = await mutateAsync(userData);
-    signUp(data.user, () => {
+    signUp(data, () => {
       navigate(RoutePaths.CreateFeed);
     });
     setErrorMessage(null);
