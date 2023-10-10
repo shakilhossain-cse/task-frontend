@@ -9,6 +9,7 @@ interface ReactionProps {
 
 const Reaction: React.FC<ReactionProps> = ({ onAddReaction, selectedReactions }) => {
   const { reactions } = useReaction();
+console.log(selectedReactions);
 
   return (
     <Stack direction="row" spacing={2}>
@@ -16,7 +17,7 @@ const Reaction: React.FC<ReactionProps> = ({ onAddReaction, selectedReactions })
         reactions.map((reaction) => (
           <Button
             key={reaction.id}
-            variant={selectedReactions && selectedReactions.some((selected) => selected.title === reaction.title) ? 'contained' : 'outlined'}
+            variant={selectedReactions && selectedReactions.some((selected) => selected.title === reaction.title)  ? 'contained' : 'outlined'}
             onClick={() => onAddReaction(reaction.id)}
           >
             {reaction.title}

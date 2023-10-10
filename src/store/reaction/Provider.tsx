@@ -7,9 +7,11 @@ import {
   createReplayReaction,
   getAllReaction,
 } from "../../api/reactionApi";
+import { getNotification } from "../../api/notificationApi";
 
 interface ReactionContextType {
   reactions: IReaction[];
+  notifications: any[];
   addPostReaction: (postId: number, id: number) => void;
   addCommentReaction: (commentId: number, reactionId: number) => void;
   addReplayReaction: (replayId: number, reactionId: number) => void;
@@ -17,6 +19,7 @@ interface ReactionContextType {
 
 const initialReactionContext: ReactionContextType = {
   reactions: [],
+  notifications:[],
   addPostReaction: () => {},
   addCommentReaction: () => {},
   addReplayReaction: () => {},
@@ -28,17 +31,33 @@ const ReactionContext = createContext<ReactionContextType>(
 
 const ReactionProvider: React.FC<React.PropsWithChildren> = (props) => {
   const queryClient = useQueryClient()
+  const [notifications, setNotification] = useState<any[]>([]); 
   const [reactions, setReactions] = useState<IReaction[]>([]);
-  const { data, status } = useQuery({
+  const { data:notificationData, status:notificationStatus } = useQuery({
+    queryKey: ["getNotification"],
+    queryFn: getNotification,
+  });
+
+
+  const { data:reactionsData, status :reactionStatus } = useQuery({
     queryKey: ["getAllReactions"],
     queryFn: getAllReaction,
   });
 
+
+
+
   useEffect(() => {
-    if (status === "success") {
-      setReactions(data);
+    if (reactionStatus === "success") {
+      setReactions(reactionsData);
     }
-  }, [status, data]);
+    if(notificationStatus === "success"){
+      setNotification(notificationData)
+    }
+  }, [reactionsData, reactionStatus,notificationData,notificationStatus]);
+
+
+  
 
   const { mutateAsync: createPostReactionMutation } = useMutation<
     void,
@@ -129,6 +148,7 @@ const ReactionProvider: React.FC<React.PropsWithChildren> = (props) => {
 
   const contextValue: ReactionContextType = {
     reactions,
+    notifications,
     addPostReaction,
     addCommentReaction,
     addReplayReaction,

@@ -1,4 +1,5 @@
 import * as React from "react";
+import AddAlertIcon from '@mui/icons-material/AddAlert';
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -17,6 +18,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth, useAuthActions } from "../store/auth/Provider";
 import { useMutation } from "@tanstack/react-query";
 import { logoutUser } from "../api/authApi";
+import { useReaction } from "../store/reaction/Provider";
 
 const pages = [
   {
@@ -26,10 +28,11 @@ const pages = [
 ];
 
 function Navbar() {
-  const {navigate} = useNavigate();
+  const { navigate } = useNavigate();
   const { user } = useAuth();
   const { signOut } = useAuthActions();
   const { mutateAsync } = useMutation(logoutUser);
+  const { notifications } = useReaction();
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
@@ -37,6 +40,9 @@ function Navbar() {
     null
   );
 
+  const [anchorElNotification, setAnchorElNotification] = React.useState<null | HTMLElement>(
+    null
+  );
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -52,13 +58,24 @@ function Navbar() {
     setAnchorElUser(null);
   };
 
-  const handleLogout = async() => {
-    
-  await mutateAsync(user);
-    signOut(()=>{
+
+  const handelCloseNoficationMenu = () => {
+    setAnchorElNotification(null)
+  }
+
+  const handleOpenNotification = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElNotification(event.currentTarget)
+  }
+
+
+
+  const handleLogout = async () => {
+    await mutateAsync(user);
+    signOut(() => {
       navigate(RoutePaths.Login);
-    })
+    });
   };
+ 
 
   return (
     <AppBar position="static">
@@ -156,7 +173,34 @@ function Navbar() {
               </Link>
             ))}
           </Box>
-
+          <Box sx={{ flexGrow: 0 , marginRight:"1rem"}} onClick={handleOpenNotification}>
+            <Tooltip title="Open Notification">
+           
+            <AddAlertIcon/>
+            </Tooltip>
+            <Menu
+              sx={{ mt: "45px", }}
+              id="menu-appbar"
+              anchorEl={anchorElNotification}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(anchorElNotification)}
+              onClose={handelCloseNoficationMenu}
+            >
+              {notifications.map((notification) => (
+                <MenuItem>
+                  <Typography textAlign="center">{JSON.parse(notification.data).message}</Typography>
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
