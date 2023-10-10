@@ -15,15 +15,40 @@ import { Link } from "react-router-dom";
 import { RoutePaths } from "../enums/routes";
 import UserProfile from "./UserProfile";
 import Reaction from "./Reaction";
-import { useReaction } from "../store/reaction/Provider";
+
 import ReactionCount from "./ReactionCount";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createPostReaction } from "../api/reactionApi";
+import { useApp } from "../store/app/Provider";
 
 const PostFeed: React.FC<IPostFeed> = ({ post }) => {
-  const { reactions, addPostReaction } = useReaction();
+  const { reactions } = useApp();
 
-  const handelAddPostReaction = async (id: number) => {
-    await addPostReaction(Number(post.id), id);
-  };
+  const queryClient = useQueryClient()
+
+// post reaction mutation 
+  const { mutateAsync: createPostReactionMutation } = useMutation<
+  void,
+  Error,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { postId: number; reactionId: number }
+>({
+  mutationFn: ({ postId, reactionId }) =>
+    createPostReaction(postId, reactionId),
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: ["getPostData"],
+    });
+    queryClient.invalidateQueries({
+      queryKey: ["getAllData"],
+    });
+  },
+});
+
+
+const handelAddPostReaction = async (id: number) => {
+  createPostReactionMutation({postId:Number(post.id), reactionId:id})
+};
 
 
   return (

@@ -1,5 +1,5 @@
-import * as React from "react";
-import AddAlertIcon from '@mui/icons-material/AddAlert';
+import React,{useEffect} from "react";
+import AddAlertIcon from "@mui/icons-material/AddAlert";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -18,7 +18,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth, useAuthActions } from "../store/auth/Provider";
 import { useMutation } from "@tanstack/react-query";
 import { logoutUser } from "../api/authApi";
-import { useReaction } from "../store/reaction/Provider";
+import { useApp } from "../store/app/Provider";
 
 const pages = [
   {
@@ -32,7 +32,7 @@ function Navbar() {
   const { user } = useAuth();
   const { signOut } = useAuthActions();
   const { mutateAsync } = useMutation(logoutUser);
-  const { notifications } = useReaction();
+  const { notifications } = useApp();
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
@@ -40,9 +40,8 @@ function Navbar() {
     null
   );
 
-  const [anchorElNotification, setAnchorElNotification] = React.useState<null | HTMLElement>(
-    null
-  );
+  const [anchorElNotification, setAnchorElNotification] =
+    React.useState<null | HTMLElement>(null);
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -58,15 +57,30 @@ function Navbar() {
     setAnchorElUser(null);
   };
 
-
-  const handelCloseNoficationMenu = () => {
-    setAnchorElNotification(null)
-  }
+  const handleCloseNotification = () => {
+    setAnchorElNotification(null);
+  };
 
   const handleOpenNotification = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNotification(event.currentTarget)
-  }
+    setAnchorElNotification(event.currentTarget);
+  };
 
+
+
+
+  useEffect(() => {
+    const handleDocumentClick = (event) => {
+      if (anchorElNotification && !anchorElNotification.contains(event.target)) {
+        handleCloseNotification();
+      }
+    };
+
+    document.addEventListener('click', handleDocumentClick);
+
+    return () => {
+      document.removeEventListener('click', handleDocumentClick);
+    };
+  }, [anchorElNotification]); 
 
 
   const handleLogout = async () => {
@@ -75,7 +89,6 @@ function Navbar() {
       navigate(RoutePaths.Login);
     });
   };
- 
 
   return (
     <AppBar position="static">
@@ -173,14 +186,16 @@ function Navbar() {
               </Link>
             ))}
           </Box>
-          <Box sx={{ flexGrow: 0 , marginRight:"1rem"}} onClick={handleOpenNotification}>
+          <Box
+            sx={{ flexGrow: 0, marginRight: "1rem" }}
+            onClick={handleOpenNotification}
+          >
             <Tooltip title="Open Notification">
-           
-            <AddAlertIcon/>
+              <AddAlertIcon />
             </Tooltip>
             <Menu
-              sx={{ mt: "45px", }}
-              id="menu-appbar"
+              sx={{ mt: "45px" }}
+              id="menu-appbariu"
               anchorEl={anchorElNotification}
               anchorOrigin={{
                 vertical: "top",
@@ -192,11 +207,25 @@ function Navbar() {
                 horizontal: "right",
               }}
               open={Boolean(anchorElNotification)}
-              onClose={handelCloseNoficationMenu}
+              onClose={handleCloseNotification}
             >
+              <Box
+                padding={1}
+                sx={{
+                  background: "red",
+                  display: "inline-block",
+                  cursor: "pointer",
+                  color: "white",
+                }}
+                onClick={handleCloseNotification}
+              >
+                X
+              </Box>
               {notifications.map((notification) => (
-                <MenuItem>
-                  <Typography textAlign="center">{JSON.parse(notification.data).message}</Typography>
+                <MenuItem key={notification.id}>
+                  <Typography textAlign="center">
+                    {notification.data.message}
+                  </Typography>
                 </MenuItem>
               ))}
             </Menu>

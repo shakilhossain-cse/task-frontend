@@ -9,20 +9,47 @@ import {
   Card,
   Box,
 } from "@mui/material";
-import {  useQuery } from "@tanstack/react-query";
+import {  useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPostData } from "../api/postApi";
 import { IPostFeed } from "../interfaces/type";
 import Comments from "../components/Comments";
 import Reaction from "../components/Reaction";
-import { useReaction } from "../store/reaction/Provider";
 import ReactionCount from "../components/ReactionCount";
+import { createPostReaction } from "../api/reactionApi";
 
 function PostDetails() {
-  const { addPostReaction } = useReaction();
-
   const { postId } = useParams();
 
+  const queryClient = useQueryClient()
 
+  // post reaction mutation 
+    const { mutateAsync: createPostReactionMutation } = useMutation<
+    void,
+    Error,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    { postId: number; reactionId: number }
+  >({
+    mutationFn: ({ postId, reactionId }) =>
+      createPostReaction(postId, reactionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["getPostData"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["getAllData"],
+      });
+    },
+  });
+  
+ 
+
+  const handelAddPostReaction = async (id: number) => {
+    createPostReactionMutation({postId:Number(postId), reactionId:id})
+  };
+
+
+
+  
   const { data, isLoading, isError, refetch } = useQuery<IPostFeed>(
     ["getPostData", postId],
     () => getPostData(Number(postId))
@@ -32,15 +59,7 @@ function PostDetails() {
   if (isLoading) return "Loading...";
 
   if (isError) return "An error occurred.";
-
- 
-
-  const handelAddPostReaction = async (id: number) => {
-    addPostReaction(Number(postId), id);
-    refetch()
-  };
-
-
+  
   // Now you can use the 'data' in your component
 
   return (

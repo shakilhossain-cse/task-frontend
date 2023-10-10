@@ -1,6 +1,6 @@
 import { Stack, Button } from '@mui/material';
-import { useReaction } from '../store/reaction/Provider';
 import { IUserReaction } from '../interfaces/type';
+import { useApp } from '../store/app/Provider';
 
 interface ReactionProps {
   onAddReaction: (reactionId: number) => void;
@@ -8,8 +8,7 @@ interface ReactionProps {
 }
 
 const Reaction: React.FC<ReactionProps> = ({ onAddReaction, selectedReactions }) => {
-  const { reactions } = useReaction();
-console.log(selectedReactions);
+  const { reactions } = useApp();  
 
   return (
     <Stack direction="row" spacing={2}>
@@ -17,7 +16,7 @@ console.log(selectedReactions);
         reactions.map((reaction) => (
           <Button
             key={reaction.id}
-            variant={selectedReactions && selectedReactions.some((selected) => selected.title === reaction.title)  ? 'contained' : 'outlined'}
+            variant={selectedReactions && selectedReactions.find((selected) => selected.title === reaction.title)?.user  ? 'contained' : 'outlined'}
             onClick={() => onAddReaction(reaction.id)}
           >
             {reaction.title}

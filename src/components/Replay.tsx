@@ -2,18 +2,43 @@ import { Box, Typography } from "@mui/material";
 import React from "react";
 import { IReply } from "../interfaces/type";
 import Reaction from "./Reaction";
-import { useReaction } from "../store/reaction/Provider";
 import ReactionCount from "./ReactionCount";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createReplayReaction } from "../api/reactionApi";
 
 interface IReplayProps {
   replay: IReply;
 }
 const Replay: React.FC<IReplayProps> = ({ replay }) => {
-  const { addReplayReaction } = useReaction();
+  const queryClient = useQueryClient()
+
+
+  // replay reaction mutation 
+  const { mutateAsync: createReplayReactionMutation } = useMutation<
+    void,
+    Error,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    { replayId: number; reactionId: number }
+  >({
+    mutationFn: ({ replayId, reactionId }) =>
+      createReplayReaction(replayId, reactionId),
+    onSuccess() {
+      queryClient.invalidateQueries({
+        queryKey: ["getPostData"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["getAllData"],
+      });
+    },
+  });
+
 
   const handelAddReplayReaction = (reactionId: number) => {
-    addReplayReaction(Number(replay.id), reactionId);
+    createReplayReactionMutation({replayId:Number(replay.id), reactionId:reactionId})
   };
+
+
+  
 
   return (
     <Box

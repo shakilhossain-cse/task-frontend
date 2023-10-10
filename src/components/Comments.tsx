@@ -1,6 +1,6 @@
 import { Box, TextField, Button } from "@mui/material";
 import { CommentProps, } from "../interfaces/type";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { createComment } from "../api/commentReplayApi";
 // import Reaction from "./Reaction";
@@ -17,8 +17,10 @@ const Comments: React.FC<CommentProps> = ({ comments, postid, refetch }) => {
     { data: any; postId: number }
   >(({ data, postId }) => createComment(data, postId));
 
-  const handelAddComment = async () => {
+  const handelAddComment = async (event:React.FormEvent) => {
+    event.preventDefault()
     if (!comment) return;
+console.log('hit from ');
 
     try {
       await createCommentMutation({
@@ -34,25 +36,23 @@ const Comments: React.FC<CommentProps> = ({ comments, postid, refetch }) => {
 
   return (
     <div>
-      <Box>
+      <form onSubmit={handelAddComment}>
         <TextField
           label="Add a comment"
           variant="outlined"
           sx={{ marginTop: "10px" }}
           fullWidth
-          multiline
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          rows={1}
         />
         <Button
           variant="contained"
           sx={{ marginTop: "10px" }}
-          onClick={handelAddComment}
+          type="submit"
         >
           Comment
         </Button>
-      </Box>
+      </form>
       {comments.map((comment) => (
         <div key={comment.id}>
           <Comment comment={comment} refetch={refetch}/>

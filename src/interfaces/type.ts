@@ -16,7 +16,8 @@ export interface IReaction {
 
 export interface IUserReaction {
   title:string;
-  count:number
+  count:number;
+  user:boolean;
 }
 
 export interface IPostFeed {

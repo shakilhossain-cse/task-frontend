@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { IComment, IReply } from "../interfaces/type";
 import { Box, Button, TextField, Typography } from "@mui/material";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createReplay } from "../api/commentReplayApi";
 import Replay from "./Replay";
-import { useReaction } from "../store/reaction/Provider";
 import Reaction from "./Reaction";
 import ReactionCount from "./ReactionCount";
+import { createCommentReaction } from "../api/reactionApi";
 
 interface ICommentProp {
   comment: IComment;
@@ -14,6 +14,8 @@ interface ICommentProp {
 }
 
 const Comment: React.FC<ICommentProp> = ({ comment, refetch }) => {
+  const queryClient = useQueryClient()
+
   const [replyInputs, setReplyInputs] = useState<{
     [commentId: number]: string;
   }>({});
@@ -22,14 +24,38 @@ const Comment: React.FC<ICommentProp> = ({ comment, refetch }) => {
     Error,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     { data: any; postId: number }
-  >(({ data, postId }) => createReplay(data, postId));
+  >({
+    mutationFn : ({ data, postId }) => createReplay(data, postId),
+  });
 
-  const { addCommentReaction } = useReaction();
 
-  const handelAddCommentReaction = async (id: number) => {
-    addCommentReaction(Number(comment.id), id);
-    refetch();
-  };
+// comment Reaction mutation 
+
+  const { mutateAsync: createCommentReactionMutation } = useMutation<
+  void,
+  Error,
+  { commentId: number; reactionId: number }
+>({
+  mutationFn: ({ commentId, reactionId }) =>
+    createCommentReaction(commentId, reactionId),
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: ["getPostData"],
+    });
+    queryClient.invalidateQueries({
+      queryKey: ["getAllData"],
+    });
+  },
+});
+
+
+
+const handelAddCommentReaction = async (id: number) => {
+  const commentId = Number(comment.id);
+  createCommentReactionMutation({ commentId, reactionId:id });
+};
+
+
 
   const handleAddReply = async (commentId: number) => {
     const replyInput = replyInputs[commentId];
@@ -41,12 +67,12 @@ const Comment: React.FC<ICommentProp> = ({ comment, refetch }) => {
         data: { body: replyInput },
         postId: Number(commentId),
       });
-      refetch();
     } catch (error) {
       console.error("Error creating replay:", error);
     }
 
     setReplyInputs({ ...replyInputs, [commentId]: "" });
+    refetch()
   };
 
   return (
@@ -71,12 +97,12 @@ const Comment: React.FC<ICommentProp> = ({ comment, refetch }) => {
           variant="outlined"
           sx={{ marginTop: "5px" }}
           fullWidth
-          multiline
+         
           value={replyInputs[comment.id] || ""}
           onChange={(e) =>
             setReplyInputs({ ...replyInputs, [comment.id]: e.target.value })
           }
-          rows={1}
+         
         />
         <Button
           variant="contained"

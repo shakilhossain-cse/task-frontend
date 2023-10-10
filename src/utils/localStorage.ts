@@ -20,6 +20,15 @@ const getFromLocalStorage = <T>(key: string): T | null => {
       console.error(`Error storing data in local storage for key ${key}:`, error);
     }
   };
+
+  const removeFromLocalStorage = (key:string) => {
+    try {
+      
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.error(`Error removeing data in local storage for key ${key}:`, error);
+    }
+  }
   
-  export { getFromLocalStorage, setLocalStorage };
+  export { getFromLocalStorage, setLocalStorage ,removeFromLocalStorage};
   

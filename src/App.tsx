@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import Routes from "./routes/Routes";
 import AuthProvider from "./store/auth/Provider";
-import ReactionProvider from "./store/reaction/Provider";
+import AppProvider from "./store/app/Provider";
 
 export const queryClient = new QueryClient();
 function App() {
@@ -10,11 +10,11 @@ function App() {
     <>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <ReactionProvider>
+          <AppProvider>
             <BrowserRouter>
               <Routes />
             </BrowserRouter>
-          </ReactionProvider>
+          </AppProvider>
         </AuthProvider>
       </QueryClientProvider>
     </>

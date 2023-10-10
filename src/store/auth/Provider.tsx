@@ -46,6 +46,8 @@ const AuthProvider: React.FC<React.PropsWithChildren> = (props) => {
 
   function signOut(cb: VoidFunction) {
     dispatch({ type: "logout" });
+    console.log('call');
+    
     cb();
   }
 
