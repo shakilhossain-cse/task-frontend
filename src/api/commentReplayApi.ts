@@ -11,3 +11,6 @@ export const createComment = async (data: {body:string}, postId: number): Promis
     const response = await HttpClient.post(`comments/${commentId}/replies`, data);
     return response.data;
   };
+
+
+  

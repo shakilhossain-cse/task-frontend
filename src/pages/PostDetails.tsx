@@ -1,61 +1,45 @@
 import { useParams } from "react-router-dom";
 import {
-  Button,
   Container,
   Typography,
   CardActionArea,
   CardActions,
   CardMedia,
   CardContent,
-  TextField,
   Card,
   Box,
 } from "@mui/material";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {  useQuery } from "@tanstack/react-query";
 import { getPostData } from "../api/postApi";
-// import UserProfile from "../components/UserProfile";
 import { IPostFeed } from "../interfaces/type";
-import Comment from "../components/Comment";
-import { useState } from "react";
-import { createComment } from "../api/commentReplayApi";
-
-
+import Comments from "../components/Comments";
+import Reaction from "../components/Reaction";
+import { useReaction } from "../store/reaction/Provider";
+import ReactionCount from "../components/ReactionCount";
 
 function PostDetails() {
+  const { addPostReaction } = useReaction();
 
-  const { mutateAsync } = useMutation<
-    void,
-    Error,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    { data: any; postId: number }
-  >(({ data, postId }) => createComment(data, postId));
   const { postId } = useParams();
-  const [comment, setComment] = useState<string>("");
 
-  const { data, isLoading, isError,refetch } = useQuery<IPostFeed>(
+
+  const { data, isLoading, isError, refetch } = useQuery<IPostFeed>(
     ["getPostData", postId],
-    () => getPostData(Number(postId)),
-   
+    () => getPostData(Number(postId))
   );
-
   
+
   if (isLoading) return "Loading...";
 
   if (isError) return "An error occurred.";
 
-  const handelAddComment = async () => {
-    if (!comment) return;
+ 
 
-    try {
-      await mutateAsync({ data: { body: comment }, postId: Number(postId) });
-      setComment('');
-      refetch();
-    } catch (error) {
-      console.error("Error creating comment:", error);
-    }
+  const handelAddPostReaction = async (id: number) => {
+    addPostReaction(Number(postId), id);
+    refetch()
   };
 
-  
 
   // Now you can use the 'data' in your component
 
@@ -80,36 +64,17 @@ function PostDetails() {
             </Typography>
           </CardContent>
         </CardActionArea>
+        <Box>
+          {data.post.reactionsData && data.post.reactionsData.map((reaction, index) => <ReactionCount key={index} reaction={reaction}/>)}
+          </Box>
         <CardActions>
-          {data.reactions &&
-            data.reactions.map((reaction) => (
-              <Button size="small" color="primary">
-                {reaction.title}
-              </Button>
-            ))}
+          <Reaction onAddReaction={handelAddPostReaction} selectedReactions={data.post.reactionsData}/>
         </CardActions>
       </Card>
-      <Box>
-        <TextField
-          label="Add a comment"
-          variant="outlined"
-          sx={{ marginTop: "10px" }}
-          fullWidth
-          multiline
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          rows={1}
-        />
-        <Button
-          variant="contained"
-          sx={{ marginTop: "10px" }}
-          onClick={handelAddComment}
-        >
-          Comment
-        </Button>
-      </Box>
-      {data.post.comments && <Comment comments={data.post.comments} refetch={refetch} />}
-    
+
+      {data.post.comments && (
+        <Comments comments={data.post.comments} postid={data.post.id} refetch={refetch} />
+      )}
     </Container>
   );
 }

@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import Card from "@mui/material/Card";
 
 import CardMedia from "@mui/material/CardMedia";
@@ -10,17 +10,25 @@ import Typography from "@mui/material/Typography";
 
 import CommentIcon from "@mui/icons-material/Comment";
 
-import {IPostFeed } from '../interfaces/type';
-import { Link } from 'react-router-dom';
-import { RoutePaths } from '../enums/routes';
-import UserProfile from './UserProfile';
+import { IPostFeed } from "../interfaces/type";
+import { Link } from "react-router-dom";
+import { RoutePaths } from "../enums/routes";
+import UserProfile from "./UserProfile";
+import Reaction from "./Reaction";
+import { useReaction } from "../store/reaction/Provider";
+import ReactionCount from "./ReactionCount";
 
+const PostFeed: React.FC<IPostFeed> = ({ post }) => {
+  const { reactions, addPostReaction } = useReaction();
 
-const PostFeed: React.FC<IPostFeed> = ({post,reactions}) => {
+  const handelAddPostReaction = async (id: number) => {
+    await addPostReaction(Number(post.id), id);
+  };
+
 
   return (
     <Card>
-      <UserProfile data={post.user} created_at={post.created_at}/>
+      <UserProfile data={post.user} created_at={post.created_at} />
       {post.images.length ? (
         <CardMedia
           component="img"
@@ -29,23 +37,18 @@ const PostFeed: React.FC<IPostFeed> = ({post,reactions}) => {
           alt="Paella dish"
         />
       ) : (
-        ''
+        ""
       )}
       <Link to={`${RoutePaths.PostDetails}/${post.id}`}>
-      
-      <CardContent>
-        <Typography variant="body2" color="text.secondary">
-          {post.title}
-        </Typography>
-      </CardContent>
+        <CardContent>
+          <Typography variant="body2" color="text.secondary">
+            {post.title}
+          </Typography>
+        </CardContent>
       </Link>
-      <CardActions sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        {reactions.map((reaction) => (
-          <IconButton aria-label="add to favorites" key={reaction.id}>
-            {reaction.title}
-          </IconButton>
-        ))}
-
+        {post.reactionsData && post.reactionsData.map(reaction =>  <ReactionCount reaction={reaction} />)}
+      <CardActions sx={{ display: "flex", justifyContent: "space-between" }}>
+        {reactions && <Reaction onAddReaction={handelAddPostReaction} selectedReactions={post.reactionsData} />}
         <IconButton aria-label="share">
           <CommentIcon />
         </IconButton>
@@ -53,4 +56,4 @@ const PostFeed: React.FC<IPostFeed> = ({post,reactions}) => {
     </Card>
   );
 };
- export default  PostFeed
+export default PostFeed;

@@ -1,20 +1,27 @@
 export interface IPost {
-  id:number;
+  id: number;
   user?: {
     name: string;
   };
   title: string;
-  images: string[]; 
-  created_at: string; 
+  images: string[];
+  created_at: string;
   comments: IComment[];
+  reactionsData : IUserReaction[];
+}
+export interface IReaction {
+  id: number;
+  title: string;
 }
 
+export interface IUserReaction {
+  title:string;
+  count:number
+}
 
 export interface IPostFeed {
   post: IPost;
-  reactions: {id:number,title:string}[]
 }
-
 
 export interface IReply {
   id: number;
@@ -22,6 +29,7 @@ export interface IReply {
   user: {
     name: string;
   };
+  reactionsData : IUserReaction[];
 }
 
 export interface IComment {
@@ -31,9 +39,11 @@ export interface IComment {
     name: string;
   };
   replies: IReply[];
+  reactionsData : IUserReaction[];
 }
 
 export interface CommentProps {
   comments: IComment[];
-  refetch: () => void
+  postid:number,
+  refetch: () => void;
 }

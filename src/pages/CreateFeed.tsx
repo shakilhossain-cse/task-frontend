@@ -16,26 +16,17 @@ const CreateFeed: FC = () => {
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-
-  
-    if (files && files.length > 0) {
-      const newImages = Array.from(files).map((file) => {
-        const reader = new FileReader();
-        return new Promise<string>((resolve) => {
-          reader.onloadend = () => {
-            console.log('reader.result:', reader.result);
-            resolve(reader.result as string);
-          };
-          reader.readAsDataURL(file);
-        });
-      });
-  
-      Promise.all(newImages).then((images) => {
-        setSelectedImages(images);
-      });
+    
+    if (files) {
+      const filesArray = Array.from(files);
+      setSelectedImages(filesArray);
+    } else {
+      setSelectedImages([]);
     }
   };
   
+  
+    
   
 
   const clearImage = (index: number) => {
@@ -51,6 +42,8 @@ const CreateFeed: FC = () => {
   const handelSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log(selectedImages);
+    
     const formData = new FormData();
     formData.append("title", title);
 
@@ -100,7 +93,7 @@ const CreateFeed: FC = () => {
           {selectedImages.map((image, index: number) => (
             <Box sx={{ position: "relative" }} key={index}>
               <img
-                src={image}
+                src={URL.createObjectURL(image)}
                 alt={`selected image ${index + 1}`}
                 style={{ height: "80px" }}
               />

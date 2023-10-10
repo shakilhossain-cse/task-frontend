@@ -10,7 +10,7 @@ function UserLayout() {
   if (!user) {
      return <Navigate to={RoutePaths.Login} />;
   }
-
+  
   return (
     <Box>
       <Navbar />
