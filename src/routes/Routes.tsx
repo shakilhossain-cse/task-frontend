@@ -8,6 +8,7 @@ import ForgetPassword from "../pages/Auth/ForgetPassword";
 import Home from "../pages/Home";
 import CreateFeed from "../pages/CreateFeed";
 import PostDetails from "../pages/PostDetails";
+import ResetPassword from "../pages/Auth/RestPassword";
 
 function Routes() {
   return (
@@ -21,6 +22,7 @@ function Routes() {
         <Route path={RoutePaths.Login} element={<Login />} />
         <Route path={RoutePaths.Register} element={<Register />} />
         <Route path={RoutePaths.ForgetPassword} element={<ForgetPassword />} />
+        <Route  path={`${RoutePaths.PasswordReset}/:token`} element={<ResetPassword />} />
       </Route>
     </Router>
   );

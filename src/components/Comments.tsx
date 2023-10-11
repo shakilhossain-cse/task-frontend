@@ -20,8 +20,6 @@ const Comments: React.FC<CommentProps> = ({ comments, postid, refetch }) => {
   const handelAddComment = async (event:React.FormEvent) => {
     event.preventDefault()
     if (!comment) return;
-console.log('hit from ');
-
     try {
       await createCommentMutation({
         data: { body: comment },

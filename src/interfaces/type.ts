@@ -48,3 +48,7 @@ export interface CommentProps {
   postid:number,
   refetch: () => void;
 }
+
+
+
+
